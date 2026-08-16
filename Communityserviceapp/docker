@@ -7,19 +7,14 @@ COPY src ./src
 
 RUN mvn clean package -DskipTests
 
-# Extract class files and dependencies directly from the JAR
-RUN mkdir -p target/dependency && (cd target/dependency; jar -xf ../*.jar)
-
-# Stage 2: Run stage
+# Stage 2: Execution stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copy extracted dependencies and application classes
-COPY --from=build /app/target/dependency/BOOT-INF/lib /app/lib
-COPY --from=build /app/target/dependency/META-INF /app/META-INF
-COPY --from=build /app/target/dependency/BOOT-INF/classes /app
+# Copy the entire target folder to guarantee access to classes and dependencies
+COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080
 
-# Run using Main-Class path directly to bypass manifest requirement
-ENTRYPOINT ["java", "-cp", "app:app/lib/*", "com.example.communityservice.CommunityServiceApplication"]
+# Run using the jar-launcher classpath
+ENTRYPOINT ["java", "-cp", "app.jar", "org.springframework.boot.loader.launch.JarLauncher"]
