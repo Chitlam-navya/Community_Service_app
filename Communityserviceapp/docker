@@ -5,16 +5,19 @@ WORKDIR /app
 COPY pom.xml .
 COPY src ./src
 
-RUN mvn clean package -DskipTests
+# Compile and copy runtime dependencies into target/dependency
+RUN mvn clean package -DskipTests && \
+    mvn dependency:copy-dependencies -DoutputDirectory=target/dependency
 
-# Stage 2: Execution stage
+# Stage 2: Run stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copy the entire target folder to guarantee access to classes and dependencies
-COPY --from=build /app/target/*.jar /app/app.jar
+# Copy compiled classes and target dependencies
+COPY --from=build /app/target/classes /app/classes
+COPY --from=build /app/target/dependency /app/dependency
 
 EXPOSE 8080
 
-# Run using the jar-launcher classpath
-ENTRYPOINT ["java", "-cp", "app.jar", "org.springframework.boot.loader.launch.JarLauncher"]
+# Execute using classpath scanning
+ENTRYPOINT ["java", "-cp", "/app/classes:/app/dependency/*"]
