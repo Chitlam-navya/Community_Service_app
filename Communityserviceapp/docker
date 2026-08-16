@@ -21,4 +21,4 @@ EXPOSE 8080
 
 # Run Java directly using the classpath wildcard
 # Replace your current ENTRYPOINT with running the built jar file
-ENTRYPOINT ["java", "-jar", "target/Communityserviceapp-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "Communityserviceapp-0.0.1-SNAPSHOT.jar"]
