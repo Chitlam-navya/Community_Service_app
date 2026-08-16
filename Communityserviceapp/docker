@@ -1,24 +1,28 @@
-# Stage 1: Build stage
+# ==========================================
+# Build Stage
+# ==========================================
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
+# Copy pom.xml first to leverage Docker layer caching for dependencies
 COPY pom.xml .
+RUN mvn dependency:go-offline -B
+
+# Copy source code and build the application executable JAR
 COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Compile and copy runtime dependencies into target/dependency
-RUN mvn clean package -DskipTests && \
-    mvn dependency:copy-dependencies -DoutputDirectory=target/dependency
-
-# Stage 2: Run stage
+# ==========================================
+# Runtime Stage
+# ==========================================
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copy compiled classes and target dependencies
-COPY --from=build /app/target/classes /app/classes
-COPY --from=build /app/target/dependency /app/dependency
+# Copy the generated JAR file from the build stage
+COPY --from=build /app/target/*.jar app.jar
 
+# Expose default Spring Boot application port
 EXPOSE 8080
 
-# Execute using classpath scanning
-# Example standard execution format:
-CMD ["java", "-cp", "classes:dependency/*", "com.yourpackage.MainApplication"]
+# Execute the application JAR directly
+ENTRYPOINT ["java", "-jar", "app.jar"]
