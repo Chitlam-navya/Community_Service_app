@@ -20,4 +20,5 @@ COPY --from=build /app/target/dependency /app/dependency
 EXPOSE 8080
 
 # Run Java directly using the classpath wildcard
-ENTRYPOINT ["java", "-cp", "classes:dependency/*", "com.community.CommunityServiceApplication"]
+# Replace your current ENTRYPOINT with running the built jar file
+ENTRYPOINT ["java", "-jar", "target/Communityserviceapp-0.0.1-SNAPSHOT.jar"]
