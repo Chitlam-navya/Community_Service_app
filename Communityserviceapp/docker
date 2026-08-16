@@ -1,23 +1,22 @@
-# Stage 1: Build the Spring Boot application with Maven
+# Stage 1: Build stage
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy Maven setup and source files
+# Copy configuration and source files
 COPY pom.xml .
 COPY src ./src
 
-# Package into a specific JAR file name
-RUN mvn clean package -DskipTests -DfinalName=app
+# Build skipping tests and ignoring test failures
+RUN mvn clean package -DskipTests
 
-# Stage 2: Create lightweight image for execution
+# Stage 2: Run stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Copy the explicitly named JAR from build stage
-COPY --from=build /app/target/app.jar app.jar
+# Copy whatever JAR file was generated to app.jar
+COPY --from=build /app/target/*.jar /app/app.jar
 
-# Expose Spring Boot port
+# Expose Spring Boot default port
 EXPOSE 8080
 
-# Start Spring Boot application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]
