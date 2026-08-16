@@ -20,4 +20,4 @@ COPY --from=build /app/target/dependency /app/dependency
 EXPOSE 8080
 
 # Run Java directly using the classpath wildcard
-ENTRYPOINT ["java", "-cp", "classes:dependency/*"]
+ENTRYPOINT ["java", "-cp", "classes:dependency/*", "com.community.CommunityServiceApplication"]
