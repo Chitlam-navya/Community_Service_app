@@ -20,4 +20,5 @@ COPY --from=build /app/target/dependency /app/dependency
 EXPOSE 8080
 
 # Execute using classpath scanning
-ENTRYPOINT ["java", "-cp", "/app/classes:/app/dependency/*"]
+# Example standard execution format:
+CMD ["java", "-cp", "classes:dependency/*", "com.yourpackage.MainApplication"]
